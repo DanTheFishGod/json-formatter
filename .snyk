@@ -1,0 +1,15 @@
+# Snyk (https://snyk.io) policy file
+version: v1.25.1
+
+# Ignore rules for accepted/false-positive findings.
+# Format:
+#
+# ignore:
+#   <vuln-id>:
+#     - <package-path>:
+#         reason: <reason>
+#         expires: <ISO date>
+#
+ignore: {}
+
+patch: {}

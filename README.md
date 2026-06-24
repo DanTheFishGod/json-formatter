@@ -20,7 +20,7 @@ Chrome extension that helps you view and explore JSON API responses.
 - Negligible performance impact on non-JSON pages (less than 1 millisecond)
 - Works on any valid JSON page – URL doesn't matter
 - Buttons for toggling between raw and parsed JSON
-- Parsed JSON is exported as a global variable, `json`, so you can inspect it in the console (now working again!)
+- In development builds, parsed JSON is exported as `window.json` so you can inspect it in the DevTools console
 
 ## Installation
 
@@ -34,10 +34,72 @@ Clone repo and run `bun install`.
 
 Commands:
 
-- `bun run build` - single build
-- `bun run watch` - same but watch-driven
+- `bun run build` - single DEV build
+- `bun run build:prod` - production build
+- `bun run watch` - watch-driven DEV build
+- `npm run test` - production build + Playwright test suite
+- `npm run test:dev` - DEV build + DEV-mode tests
 
 You can install `dist` as a local, unpacked extension in Chrome with developer mode enabled.
+
+### Testing
+
+Tests use [Playwright](https://playwright.dev) with the `channel: 'chromium'` browser (full Chromium, required for extension loading). The suite covers security properties, core UI behaviour, and MIME type detection.
+
+```bash
+npm run test          # production build + full test suite
+npm run test:dev      # DEV build + DEV-specific tests (e.g. window.json)
+```
+
+Test files live in `ext/_test/`:
+
+| File | Purpose |
+|---|---|
+| `fixtures.ts` | Playwright fixtures: `context`, `extensionId`, `serviceWorker` |
+| `globalSetup.ts` | Fails fast with a helpful message if `dist/` is not built |
+| `security.spec.ts` | Security verification tests (header filtering, DOM exposure, LRU, MIME, core UI) |
+| `testServer.ts` | Minimal HTTP server for tests that need real network responses |
+
+> **Note:** `page.goto()` to real TCP addresses hangs when using `channel: 'chromium'` + extension loading. Navigation tests use `page.route()` (Playwright's CDP-level intercept) instead, which resolves immediately and still runs extension content scripts correctly.
+
+### Docker
+
+A `Dockerfile` is provided for running the full test suite in a clean container (useful for CI):
+
+```bash
+docker build -t json-formatter-test .
+```
+
+This uses `mcr.microsoft.com/playwright:v1.61.0-noble` as the base (Chromium and all dependencies pre-installed), installs Bun, builds the extension in production mode, and runs the test suite.
+
+### Change management (OpenSpec)
+
+This project uses [OpenSpec](https://openspec.dev) for structured change tracking. Changes live in `openspec/changes/` during development and are archived to `openspec/changes/archive/` when complete. Reusable capability specs live in `openspec/specs/`.
+
+Common commands:
+
+```bash
+openspec new change "my-change-name"   # scaffold a new change
+openspec status --change "name"        # check artifact completion
+openspec list                          # list active changes
+```
+
+The VS Code Copilot skills in `.github/skills/` support the full workflow:
+- `/opsx:explore` — thinking/discovery mode
+- `/opsx:propose` — generate proposal + design + specs + tasks in one step
+- `/opsx:apply` — implement tasks from an active change
+- `/opsx:archive` — finalise and archive a completed change
+
+### Releasing
+
+1. Bump the version in `ext/manifest.json`
+2. Push a tag matching the version: `git tag v0.9.5 && git push origin v0.9.5`
+3. GitHub Actions builds, tests, and creates a release automatically
+4. The release includes a `json-formatter-v{version}.zip` that users can load as an unpacked extension
+
+The release workflow verifies the tag matches `manifest.json` version before publishing.
+
+To add Snyk vulnerability scanning to CI, set a `SNYK_TOKEN` repository secret (Settings → Secrets → Actions). Without it the Snyk step is skipped; with it the build fails on HIGH or CRITICAL findings.
 
 ## FAQ
 

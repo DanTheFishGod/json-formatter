@@ -8,6 +8,7 @@ import {
   repoRoot,
   distPath,
   PERFMARKS,
+  WS_NONCE,
 } from './config.build'
 import { singleFile } from './singleFile'
 import { rm, rename } from 'fs/promises'
@@ -45,6 +46,7 @@ export const build = singleFile(async () => {
       env: 'inline',
       define: {
         $PERFMARKS: JSON.stringify(PERFMARKS),
+        $WS_NONCE: JSON.stringify(WS_NONCE),
       },
       minify: true,
       sourcemap: SOURCE_MAPS ? 'linked' : false,
