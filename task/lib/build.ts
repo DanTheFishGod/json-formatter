@@ -57,6 +57,8 @@ export const build = singleFile(async () => {
     // (outdir) nor cp (destination) races to create it with mkdir.
     await mkdir(tmpPath, { recursive: true })
 
+    // Build TS bundles first — Bun.build creates subdirectories under tmp/
+    // that cp would also try to mkdir if run in parallel (EEXIST race).
     await Promise.all([
       // Bundle TypeScript entrypoints into tmp
       Bun.build(buildOpts),
@@ -69,20 +71,22 @@ export const build = singleFile(async () => {
 
       // Generate .d.ts files for all modules
       $`./node_modules/.bin/tsc -p ./tsconfig.json --outDir tmp`,
-
-      // Copy other files over
-      cp(extPath, tmpPath, {
-        recursive: true,
-        filter: (source) =>
-          !/\.tsx?$/.test(source) &&
-          (!source.endsWith('.css') ||
-            [
-              // 'content/style.css',
-              'options/options.css',
-              // 'global.css',
-            ].some((file) => source.endsWith(file))),
-      }),
     ])
+
+    // Copy non-TS files after bundles are built — by this point Bun.build has
+    // already created all subdirectories, so cp's onDir sees destStat !== null
+    // and calls copyDir instead of mkDirAndCopy (which would fail with EEXIST).
+    await cp(extPath, tmpPath, {
+      recursive: true,
+      filter: (source) =>
+        !/\.tsx?$/.test(source) &&
+        (!source.endsWith('.css') ||
+          [
+            // 'content/style.css',
+            'options/options.css',
+            // 'global.css',
+          ].some((file) => source.endsWith(file))),
+    })
   }
 
   // Mutate files in tmp
