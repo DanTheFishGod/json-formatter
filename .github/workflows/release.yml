@@ -25,7 +25,7 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Build (production)
-        run: NODE_ENV=production bun run task/build
+        run: bun run clean && NODE_ENV=production bun run task/build
 
       - name: Verify manifest version matches tag
         run: |

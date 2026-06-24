@@ -24,7 +24,7 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Build (production)
-        run: NODE_ENV=production bun run task/build
+        run: bun run clean && NODE_ENV=production bun run task/build
 
       - name: Run Snyk dependency audit
         run: npx snyk test --dev --severity-threshold=high
