@@ -1,15 +1,12 @@
 # Snyk (https://snyk.io) policy file
 version: v1.25.1
 
-# Ignore rules for accepted/false-positive findings.
-# Format:
-#
-# ignore:
-#   <vuln-id>:
-#     - <package-path>:
-#         reason: <reason>
-#         expires: <ISO date>
-#
-ignore: {}
+ignore:
+  # picomatch ReDoS via @tailwindcss/cli > @parcel/watcher > micromatch.
+  # Build tool only — not in the extension bundle. No upstream fix available yet.
+  SNYK-JS-PICOMATCH-15765511:
+    - '*':
+        reason: Build tool transitive dep only, not bundled into the extension
+        expires: '2027-01-01T00:00:00.000Z'
 
 patch: {}
