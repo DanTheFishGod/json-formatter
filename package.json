@@ -38,5 +38,9 @@
     "test": "npm run build:prod && BUILD_MODE=prod npx playwright test --project extension-prod",
     "test:prod": "npm run build:prod && BUILD_MODE=prod npx playwright test --project extension-prod",
     "test:dev": "npm run build && BUILD_MODE=dev npx playwright test --project extension-dev"
+  },
+  "overrides": {
+    "ws": "^8.21.0",
+    "brace-expansion": "^1.1.13"
   }
 }
