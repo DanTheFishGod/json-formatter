@@ -11,7 +11,7 @@ import {
   WS_NONCE,
 } from './config.build'
 import { singleFile } from './singleFile'
-import { rm, rename } from 'fs/promises'
+import { rm, rename, mkdir } from 'fs/promises'
 import { cp } from 'fs/promises'
 import { readFile } from 'fs/promises'
 import { outputReport } from './outputReport'
@@ -52,6 +52,10 @@ export const build = singleFile(async () => {
       sourcemap: SOURCE_MAPS ? 'linked' : false,
       tsconfig: 'tsconfig.json',
     }
+
+    // Ensure tmp exists before parallel operations so neither Bun.build
+    // (outdir) nor cp (destination) races to create it with mkdir.
+    await mkdir(tmpPath, { recursive: true })
 
     await Promise.all([
       // Bundle TypeScript entrypoints into tmp
