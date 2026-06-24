@@ -92,6 +92,18 @@ export const addResponseInfoToCache = async (
     // write Data
     responseCache[tabId] = responseInfo
 
+    // Evict the LRU entry if the cache exceeds 10 items
+    const MAX_CACHE_SIZE = 10
+    if (Object.keys(responseCache).length > MAX_CACHE_SIZE) {
+      const lruTabId = Object.entries(responseCache_lru).sort(
+        ([, a], [, b]) => a - b,
+      )[0]?.[0]
+      if (lruTabId !== undefined) {
+        delete responseCache[lruTabId]
+        delete responseCache_lru[lruTabId]
+      }
+    }
+
     // save both Data and Order
     await browser.storage.session.set({
       responseCache,

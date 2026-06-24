@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill'
-import { DEV } from '../lib/config.browser'
+import { DEV, WS_NONCE } from '../lib/config.browser'
 import { logGlobal, logLocal } from '../lib/logging/logging'
 import { onMessage } from '../lib/messaging/messaging'
 import { migrateOnUpdate } from '../lib/migrations/migrations'
@@ -27,6 +27,19 @@ const reload = async () => {
   browser.runtime.reload()
 }
 
+// Headers that carry authentication/session state and must not be stored or exposed.
+// Comparison is done case-insensitively. This mirrors the set of headers that CORS
+// normally blocks from JavaScript access.
+const SENSITIVE_HEADER_NAMES = new Set([
+  'set-cookie',
+  'set-cookie2',
+  'cookie',
+  'authorization',
+  'proxy-authorization',
+  'www-authenticate',
+  'proxy-authenticate',
+])
+
 // Inject formatter into tabs with Content-Type: application/json
 if (true) {
   onMessage('JF_GET_RESPONSE_INFO', async (_, sender) => {
@@ -48,6 +61,7 @@ if (true) {
 
       for (const { name, value } of details.responseHeaders!) {
         if (!value) continue
+        if (SENSITIVE_HEADER_NAMES.has(name.toLowerCase())) continue
         headers.push([name, value])
       }
 
@@ -95,11 +109,18 @@ if (true) {
         // browser.action.setBadgeBackgroundColor({})
       })
 
+      // snyk:ignore:SNYK-JS-WS-7266 -- DEV-only listener; origin is validated
+      // via a per-session nonce embedded at build time (WS_NONCE). Worst-case
+      // impact is triggering a dev extension reload on localhost.
       ws.addEventListener('message', (event) => {
-        if (event.data === 'reload_extension') {
-          // debugger
-          logLocal('Reloading extension...')
-          reload()
+        try {
+          const msg = JSON.parse(event.data)
+          if (msg.type === 'reload_extension' && msg.nonce === WS_NONCE) {
+            logLocal('Reloading extension...')
+            reload()
+          }
+        } catch {
+          // ignore malformed messages
         }
       })
     }

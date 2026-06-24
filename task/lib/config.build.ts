@@ -11,6 +11,10 @@ export const PERFMARKS = process.env.PERFMARKS
   ? process.env.PERFMARKS !== 'false'
   : DEV
 
+// Nonce injected into the worker bundle to authenticate DEV WebSocket messages.
+// Generated once per watch session and passed via WS_NONCE env var.
+export const WS_NONCE = process.env.WS_NONCE ?? ''
+
 // Directories
 export const repoRoot = path.resolve(__dirname, '..', '..')
 export const extPath = path.join(repoRoot, 'ext')

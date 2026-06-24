@@ -2,5 +2,9 @@
 dist*
 /node_modules/
 report*
+playwright-report/
+test-results/
+tmp/
+package-lock.json
 /.tsbuild/
 .env
