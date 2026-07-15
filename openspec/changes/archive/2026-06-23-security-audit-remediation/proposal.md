@@ -14,6 +14,7 @@ A manual OWASP Top 10 review combined with Snyk dependency and SAST scans reveal
 - **Deduplicate `host_permissions`** — both `"*://*/*"` and `"<all_urls>"` are listed; one implies the other
 - **Add explicit CSP** to the manifest for extension pages
 - **Add `snyk monitor`** to CI/build pipeline for ongoing dependency monitoring
+- **Remediate dependency CVEs discovered by the latest Snyk scan** — upgrade `esbuild` and pin transitive fixes for `brace-expansion` and `fast-uri`
 
 ## Capabilities
 
