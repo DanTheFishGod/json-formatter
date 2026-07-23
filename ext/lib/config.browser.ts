@@ -10,6 +10,10 @@ export const MAX_LENGTH = 3_000_000
 export const PERFMARKS = // @ts-expect-error
   $PERFMARKS as boolean
 
+// Build-time nonce for authenticating DEV WebSocket reload messages.
+export const WS_NONCE: string = // @ts-expect-error
+  $WS_NONCE
+
 export const JF_CONTEXT: JfContext =
   // @ts-expect-error
   globalThis['__jf_context']

@@ -1,7 +1,7 @@
 {
   "name": "__MSG_EXTENSION_NAME__",
   "short_name": "__MSG_EXTENSION_SHORT_NAME__",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "manifest_version": 3,
   "default_locale": "en",
   "description": "__MSG_EXTENSION_DESCRIPTION__",
@@ -29,8 +29,11 @@
       "world": "MAIN"
     }
   ],
-  "permissions": ["storage", "unlimitedStorage", "webRequest"],
-  "host_permissions": ["*://*/*", "<all_urls>"],
+  "permissions": ["storage", "webRequest"],
+  "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
   "options_ui": {
     "page": "options/options.html",
     "open_in_tab": false

@@ -10,7 +10,6 @@
 
 import { DEV } from '../lib/config.browser'
 import { whenDomLoaded } from './lib/whenDomLoaded'
-import type { TabResponseInfo } from '../worker/tabResponseCache'
 
 //
 ;(async () => {
@@ -30,35 +29,27 @@ import type { TabResponseInfo } from '../worker/tabResponseCache'
       // Parse it
       const data = JSON.parse(pre.innerText)
 
-      // Export json global
-      Object.defineProperty(window, 'json', {
-        value: data,
-        configurable: true,
-        enumerable: false,
-        writable: false,
-      })
+      // Export json global only in DEV builds — avoids exposing full JSON
+      // payload to third-party page scripts in production.
+      if (DEV) {
+        Object.defineProperty(window, 'json', {
+          value: data,
+          configurable: true,
+          enumerable: false,
+          writable: false,
+        })
+      }
 
       if (DEV) {
-        const duration = pre.dataset.duration
-        const responseInfo = JSON.parse(
-          pre.dataset.responseInfo ?? 'null',
-        ) as TabResponseInfo | void
-        // const preferences = JSON.parse(pre.dataset.preferences ?? 'null')
+        const contentType = pre.dataset.contentType ?? null
 
-        if (responseInfo) {
-          const contentTypeHeader =
-            responseInfo.headers?.find(
-              ([name]) => name.toLowerCase() === 'content-type',
-            ) ?? null
-
-          if (contentTypeHeader) {
-            console.log(
-              `%c${contentTypeHeader[0]}: %c${contentTypeHeader[1]}%c`,
-              'color: lch(60% 42% 134deg);',
-              'font-weight: bold; color: lch(60% 42% 134deg);',
-              'color: lch(60% 42% 134deg);',
-            )
-          }
+        if (contentType) {
+          console.log(
+            `%ccontent-type: %c${contentType}%c`,
+            'color: lch(60% 42% 134deg);',
+            'font-weight: bold; color: lch(60% 42% 134deg);',
+            'color: lch(60% 42% 134deg);',
+          )
         }
 
         console.log(
@@ -67,8 +58,6 @@ import type { TabResponseInfo } from '../worker/tabResponseCache'
           'font-weight: bold;',
           'color: lch(60% 42% 134deg);',
         )
-
-        // console.log('Preferences', preferences)
       }
     } catch (error) {
       if (DEV)

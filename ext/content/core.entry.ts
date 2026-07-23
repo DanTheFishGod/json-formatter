@@ -36,6 +36,9 @@ const cssPromise = new Promise<string>(async (resolve) => {
   resolve(`${css}\n\n@media (prefers-color-scheme: dark) {\n${darkThemeCss}\n}`)
 })
 
+// Module-scoped reference to the original <pre> element — not exposed on window.
+let _jfPre: HTMLPreElement | undefined
+
 const renderPromise = (async (): Promise<
   | {
       rendered: true
@@ -64,8 +67,7 @@ const renderPromise = (async (): Promise<
 
   const { pre: originalPreElement, bodyChildren, chromeJfc } = info
 
-  // @ts-expect-error
-  window.__jf_pre = originalPreElement
+  _jfPre = originalPreElement
 
   // Clear DOM before parsing (before it renders, to prevent FOUC)
   const body = document.body
@@ -270,8 +272,7 @@ renderPromise.then(async (result) => {
     if (PERFMARKS)
       logGlobal('MARKS', performance.getEntriesByName('PERF_RENDER_DURATION'))
 
-    // @ts-expect-error
-    const pre = window.__jf_pre as HTMLPreElement | void
+    const pre = _jfPre
     if (pre) {
       const responseInfoResult = await result.responseInfoPromise
 
@@ -289,13 +290,14 @@ renderPromise.then(async (result) => {
         })
       }
 
-      // does console script need preferences?
-      // pre.dataset.preferences = JSON.stringify(await prefStore.get())
-
-      if (responseInfoResult.success)
-        pre.dataset.responseInfo = JSON.stringify(
-          responseInfoResult.responseInfo,
+      // In DEV, expose the content-type header for console.entry.ts display.
+      // Only the content-type value is written — never the full headers object.
+      if (DEV && responseInfoResult.success) {
+        const ct = responseInfoResult.responseInfo.headers.find(
+          ([name]) => name.toLowerCase() === 'content-type',
         )
-    } else logLocal(`⚠️ Unexpeced - could not find window.__jf_pre`)
+        if (ct) pre.dataset.contentType = ct[1]
+      }
+    } else logLocal(`⚠️ Unexpeced - could not find _jfPre`)
   }
 })

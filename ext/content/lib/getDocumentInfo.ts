@@ -82,7 +82,7 @@ const getDocHint = () => {
     case 'text/json':
       return 'JSON'
     default:
-      if (/application\/\^(\b)+\+json/.test(contentType)) return 'JSON'
+      if (/^application\/[a-z0-9!#$&\-^_.]+\+json$/i.test(contentType)) return 'JSON'
   }
   return 'OTHER'
 }
