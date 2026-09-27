@@ -109,9 +109,9 @@ if (true) {
         // browser.action.setBadgeBackgroundColor({})
       })
 
-      // snyk:ignore:SNYK-JS-WS-7266 -- DEV-only listener; origin is validated
-      // via a per-session nonce embedded at build time (WS_NONCE). Worst-case
-      // impact is triggering a dev extension reload on localhost.
+      // snyk:ignore: javascript/InsufficientPostmessageValidation
+      // Reason: this is a localhost-only dev reload socket; messages are gated by
+      // a per-session nonce embedded at build time (WS_NONCE).
       ws.addEventListener('message', (event) => {
         try {
           const msg = JSON.parse(event.data)

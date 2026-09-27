@@ -29,6 +29,8 @@ export class TestServer {
   private _port = 0
 
   constructor(private options: TestServerOptions = {}) {
+    // snyk:ignore: javascript/HttpToHttps/test
+    // Reason: this is a loopback-only Playwright test harness, not shipped code.
     this.server = http.createServer((req, res) => {
       const contentType = this.options.contentType ?? 'text/plain'
       const body = this.options.body ?? '{"test":true,"value":42}'

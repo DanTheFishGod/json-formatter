@@ -1,12 +1,21 @@
-# Snyk (https://snyk.io) policy file
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.25.1
-
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
-  # picomatch ReDoS via @tailwindcss/cli > @parcel/watcher > micromatch.
-  # Build tool only — not in the extension bundle. No upstream fix available yet.
   SNYK-JS-PICOMATCH-15765511:
     - '*':
-        reason: Build tool transitive dep only, not bundled into the extension
+        reason: 'Build tool transitive dep only, not bundled into the extension'
         expires: '2027-01-01T00:00:00.000Z'
-
+  javascript/HttpToHttps/test:
+    - '*':
+        reason: Loopback-only Playwright test server; not shipped in extension bundle
+        expires: 2026-10-27T12:56:28.088Z
+        created: 2026-09-27T12:56:28.092Z
+  javascript/InsufficientPostmessageValidation:
+    - '*':
+        reason: >-
+          Localhost-only dev reload socket; guarded by nonces and not shipped
+          production code
+        expires: 2026-10-27T12:56:30.001Z
+        created: 2026-09-27T12:56:30.006Z
 patch: {}
