@@ -6,6 +6,10 @@ ignore:
     - '*':
         reason: 'Build tool transitive dep only, not bundled into the extension'
         expires: '2027-01-01T00:00:00.000Z'
+  SNYK-JS-BRACES-19963945:
+    - '*':
+        reason: 'Build tool transitive dep only, not bundled into the extension'
+        expires: '2027-01-01T00:00:00.000Z'
   javascript/HttpToHttps/test:
     - '*':
         reason: Loopback-only Playwright test server; not shipped in extension bundle
