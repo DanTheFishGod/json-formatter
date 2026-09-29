@@ -217,6 +217,27 @@ test.describe('window.json exposure', () => {
   })
 })
 
+test.describe('runtime regression checks', () => {
+  test('content script does not throw runtime exceptions while formatting JSON', async ({
+    context,
+  }) => {
+    const page = await context.newPage()
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+
+    await routeAndGoto(page, '{"hello":"world","items":[1,2,3]}')
+
+    const rendered = await page.evaluate(() => {
+      const el = document.querySelector('#jsonFormatterParsed')
+      return el instanceof HTMLElement ? el.textContent : null
+    })
+
+    expect(errors).toEqual([])
+    expect(rendered).toContain('hello')
+    await page.close()
+  })
+})
+
 // ─── Group 4: LRU Eviction ───────────────────────────────────────────────────
 
 test.describe('LRU cache eviction', () => {
